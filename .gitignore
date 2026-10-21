@@ -1,0 +1,25 @@
+# Build output
+dist/
+*.exe
+
+# Go
+vendor/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test
+*.test
+coverage.out
+coverage.html
+
+# Logs
+*.log
