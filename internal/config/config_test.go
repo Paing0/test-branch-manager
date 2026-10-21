@@ -28,6 +28,22 @@ func TestNew(t *testing.T) {
 	}
 }
 
+func TestSetDate(t *testing.T) {
+	cfg := New("/some/dir", false, "")
+	target := time.Date(2026, 10, 22, 10, 0, 0, 0, time.Local)
+	cfg.SetDate(target)
+
+	if cfg.DateStr != "20261022" {
+		t.Errorf("expected DateStr '20261022', got %q", cfg.DateStr)
+	}
+	if cfg.OffshoreBranchName() != "test/offshore-test-20261022" {
+		t.Errorf("expected offshore branch 'test/offshore-test-20261022', got %q", cfg.OffshoreBranchName())
+	}
+	if cfg.ITBranchName() != "test/it-20261022" {
+		t.Errorf("expected IT branch 'test/it-20261022', got %q", cfg.ITBranchName())
+	}
+}
+
 func TestBranchNames(t *testing.T) {
 	cfg := &Config{
 		DateStr: "20261021",

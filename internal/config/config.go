@@ -38,6 +38,12 @@ func New(workDir string, verbose bool, logFile string) *Config {
 	}
 }
 
+// SetDate updates the date and formatted date string.
+func (c *Config) SetDate(t time.Time) {
+	c.Date = t
+	c.DateStr = t.Format("20060102")
+}
+
 // OffshoreBranchName returns the offshore test branch name for this run.
 func (c *Config) OffshoreBranchName() string {
 	return "test/offshore-test-" + c.DateStr

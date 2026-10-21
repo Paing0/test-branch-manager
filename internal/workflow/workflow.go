@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"test-branch-creator/internal/cli"
 	"test-branch-creator/internal/config"
@@ -47,10 +48,6 @@ func (w *Workflow) Run(ctx context.Context) error {
 	w.recorder.Workflow.Status = "In progress"
 
 	w.ui.Header("Git Branch Manager")
-	w.ui.Infof("Date: %s", w.cfg.DateStr)
-	w.ui.Infof("Offshore branch: %s", w.ui.BranchName(w.cfg.OffshoreBranchName()))
-	w.ui.Infof("IT test branch:  %s", w.ui.BranchName(w.cfg.ITBranchName()))
-	w.ui.Blank()
 
 	// Step 1: Select repository
 	if err := w.selectRepository(ctx); err != nil {
@@ -62,7 +59,17 @@ func (w *Workflow) Run(ctx context.Context) error {
 		return w.handleError("Repository validation", err)
 	}
 
-	// Step 3: Select remote
+	// Step 3: Select branch date (Today or Tomorrow)
+	if err := w.selectBranchDate(ctx); err != nil {
+		return w.handleError("Date selection", err)
+	}
+
+	w.ui.Infof("Target date:     %s", w.cfg.DateStr)
+	w.ui.Infof("Offshore branch: %s", w.ui.BranchName(w.cfg.OffshoreBranchName()))
+	w.ui.Infof("IT test branch:  %s", w.ui.BranchName(w.cfg.ITBranchName()))
+	w.ui.Blank()
+
+	// Step 4: Select remote
 	if err := w.selectRemote(ctx); err != nil {
 		return w.handleError("Remote selection", err)
 	}
@@ -84,6 +91,42 @@ func (w *Workflow) Run(ctx context.Context) error {
 
 	w.recorder.Workflow.Status = "Completed successfully"
 	w.printFinalSummary()
+	return nil
+}
+
+// selectBranchDate prompts the user to choose between today's or tomorrow's date for branch naming.
+func (w *Workflow) selectBranchDate(ctx context.Context) error {
+	today := w.cfg.Date
+	if today.IsZero() {
+		today = time.Now()
+	}
+	tomorrow := today.AddDate(0, 0, 1)
+
+	todayStr := today.Format("20060102")
+	tomorrowStr := tomorrow.Format("20060102")
+
+	items := []cli.SelectItem{
+		{
+			Label: fmt.Sprintf("Today's date:    %s (%s)", todayStr, today.Format("Monday, Jan 02")),
+			Value: todayStr,
+		},
+		{
+			Label: fmt.Sprintf("Tomorrow's date: %s (%s)", tomorrowStr, tomorrow.Format("Monday, Jan 02")),
+			Value: tomorrowStr,
+		},
+	}
+
+	selected, err := w.prompter.SelectOne("Select the target date for test branches:", items)
+	if err != nil {
+		return err
+	}
+
+	if selected == tomorrowStr {
+		w.cfg.SetDate(tomorrow)
+	} else {
+		w.cfg.SetDate(today)
+	}
+
 	return nil
 }
 

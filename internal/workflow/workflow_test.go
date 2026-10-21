@@ -100,7 +100,7 @@ func TestFullWorkflow_Success(t *testing.T) {
 	var output bytes.Buffer
 	ui := cli.NewUIWithWriter(&output)
 
-	// Mock prompter that selects repo, feature branch, says no to IT merge, confirms pushes
+	// Mock prompter that selects repo, date, feature branch, says no to IT merge, confirms pushes
 	prompter := &cli.MockPrompter{
 		ConfirmResponses: []bool{
 			false, // merge existing IT test branch? No
@@ -108,8 +108,9 @@ func TestFullWorkflow_Success(t *testing.T) {
 			true,  // Push IT branch?
 		},
 		SelectResponses: []string{
-			repoDir,                       // Select repository
-			"origin/feature/payment-api",  // Select source branch
+			repoDir,                      // Select repository
+			"20261021",                   // Select date (today)
+			"origin/feature/payment-api", // Select source branch
 		},
 	}
 
@@ -192,6 +193,7 @@ func TestFullWorkflow_WithExistingITMerge(t *testing.T) {
 		},
 		SelectResponses: []string{
 			repoDir,                      // Select repo
+			"20261021",                   // Select date (today)
 			"origin/feature/payment-api", // Select source branch
 			"origin/test/it-20261020",    // Select existing IT branch
 		},
@@ -249,6 +251,7 @@ func TestWorkflow_MergeConflict(t *testing.T) {
 		},
 		SelectResponses: []string{
 			repoDir,                      // Select repo
+			"20261021",                   // Select date (today)
 			"origin/feature/conflicting", // Select source branch
 		},
 		WaitResponses: []error{
@@ -381,6 +384,7 @@ func TestWorkflow_MissingDevelop(t *testing.T) {
 	prompter := &cli.MockPrompter{
 		SelectResponses: []string{
 			repoDir,              // Select repo
+			"20261021",           // Select date (today)
 			"origin/feature/test", // Select source branch
 		},
 	}
@@ -421,6 +425,7 @@ func TestWorkflow_BranchAlreadyExists(t *testing.T) {
 		},
 		SelectResponses: []string{
 			repoDir,                      // Select repo
+			"20261021",                   // Select date (today)
 			"origin/feature/payment-api", // Select source branch
 		},
 	}
@@ -458,6 +463,7 @@ func TestWorkflow_CommandHistoryOnFailure(t *testing.T) {
 		},
 		SelectResponses: []string{
 			repoDir,
+			"20261021", // Select date (today)
 			"origin/feature/payment-api",
 		},
 	}
@@ -516,7 +522,10 @@ func TestWorkflow_MissingRemote(t *testing.T) {
 	ui := cli.NewUIWithWriter(&output)
 
 	prompter := &cli.MockPrompter{
-		SelectResponses: []string{repoDir}, // Select repo
+		SelectResponses: []string{
+			repoDir,    // Select repo
+			"20261021", // Select date (today)
+		},
 	}
 
 	cfg := &config.Config{
@@ -556,6 +565,7 @@ func TestWorkflow_ResumeDetection(t *testing.T) {
 		},
 		SelectResponses: []string{
 			repoDir,
+			"20261021", // Select date (today)
 			"origin/feature/payment-api",
 		},
 	}
